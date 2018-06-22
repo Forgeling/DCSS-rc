@@ -17,38 +17,6 @@ function ready()
 end
 }
 
-# Ignorable things
-msc := message_colour
-
-msc += mute:You butcher
-msc += mute:You start resting
-msc += mute:Things that are here:
-msc += mute:accepts your kill
-msc += mute:There is an open door here
-msc += mute:You open the door.
-msc += mute:You feel sick
-msc += mute: .* headbutt .*
-msc += mute:You riposte.
-msc += mute:You furiously retaliate.
-msc += mute:You kick the .*
-msc += mute:You bite the .*
-msc += mute:.* bites you but does no damage.
-msc += mute:.* claws you but does no damage.
-msc += mute:.* pecks you but does no damage.
-msc += mute:.* elephant trunk-slaps .*
-msc += mute:.* tentacled monstrosity misses .*
-msc += mute:.* tentacled monstrosity barely misses .*
-msc += mute:.* tentacled monstrosity tentacle-slaps you but does .*
-msc += mute:.* Executioner hits you but does no damage.
-msc += mute:Cheibriados appreciates the change of pace.
-msc += mute:Cheibriados thoroughly appreciates the change of pace.
-msc += mute:This raw flesh tastes great.
-msc += mute:The zombie hands constrict .*
-msc += mute:Zombie hands grab the .*
-msc += mute:Decaying hands burst forth from the earth.
-msc += mute:You reach down and open the door.
-msc += mute:You see here a stone.
-
 # Force mores
 force_more_message += distortion
 #force_more_message += holy wrath
