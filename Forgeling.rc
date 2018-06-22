@@ -1,0 +1,99 @@
+# Crawl Init file
+
+autofight_stop = 75
+hp_warning = 50
+default_manual_training = true
+
+auto_butcher=full
+view_delay = 50
+
+{
+local need_skills_opened = true
+function ready()
+  if you.turns() == 0 and need_skills_opened then
+    need_skills_opened = false
+    crawl.sendkeys("m")
+  end
+end
+}
+
+# Ignorable things
+msc := message_colour
+
+msc += mute:You butcher
+msc += mute:You start resting
+msc += mute:Things that are here:
+msc += mute:accepts your kill
+msc += mute:There is an open door here
+msc += mute:You open the door.
+msc += mute:You feel sick
+msc += mute: .* headbutt .*
+msc += mute:You riposte.
+msc += mute:You furiously retaliate.
+msc += mute:You kick the .*
+msc += mute:You bite the .*
+msc += mute:.* bites you but does no damage.
+msc += mute:.* claws you but does no damage.
+msc += mute:.* pecks you but does no damage.
+msc += mute:.* elephant trunk-slaps .*
+msc += mute:.* tentacled monstrosity misses .*
+msc += mute:.* tentacled monstrosity barely misses .*
+msc += mute:.* tentacled monstrosity tentacle-slaps you but does .*
+msc += mute:.* Executioner hits you but does no damage.
+msc += mute:Cheibriados appreciates the change of pace.
+msc += mute:Cheibriados thoroughly appreciates the change of pace.
+msc += mute:This raw flesh tastes great.
+msc += mute:The zombie hands constrict .*
+msc += mute:Zombie hands grab the .*
+msc += mute:Decaying hands burst forth from the earth.
+msc += mute:You reach down and open the door.
+msc += mute:You see here a stone.
+
+# Force mores
+force_more_message += distortion
+#force_more_message += holy wrath
+force_more_message += You.*teleport [^f]
+
+# Bad things
+stop += You fall through a shaft
+stop += You are sucked into a shaft! .*
+stop += An alarm trap emits a blaring wail
+stop += (blundered into a|invokes the power of) Zot
+stop += A huge blade swings out and slices into you!
+stop += flesh start
+stop += (starving|feel devoid of blood)
+stop += wrath finds you
+stop += lose consciousness
+stop += watched by something
+stop += appears from out of your range of vision
+
+# Spell Slots
+spell_slot += Blink:b
+spell_slot += Conjure Flame:c
+spell_slot += Mephitic Cloud:d
+spell_slot += Infusion:e
+spell_slot += Regeneration:h
+spell_slot += Ignition:i
+spell_slot += Deflect Missiles:m
+spell_slot += Apportation:n
+spell_slot += Shroud of Golubria:q
+spell_slot += Swiftness:r
+spell_slot += Sticky Flame:s
+spell_slot += Poisonous Vapours:s
+spell_slot += Bolt of Fire:v
+spell_slot += Bolt of Cold:v
+spell_slot += Song of Slaying:w
+spell_slot += Fireball:x
+spell_slot += Stone Arrow:x
+
+# Inscription
+ai := autoinscribe
+
+ai += curing:@q1
+ai += heal wounds:@q2
+ai += identify:@r1
+ai += remove curse:@r2
+ai += scrolls? of teleportation:@r3
+ai += magic mapping:@r4
+
+ai += phantom mirror:=g
