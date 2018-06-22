@@ -17,6 +17,8 @@ function ready()
 end
 }
 
+#include ignores.rc
+
 # Force mores
 force_more_message += distortion
 #force_more_message += holy wrath
