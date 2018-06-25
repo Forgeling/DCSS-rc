@@ -1,12 +1,3 @@
-# Crawl Init file
-
-autofight_stop = 75
-hp_warning = 50
-default_manual_training = true
-
-auto_butcher=full
-view_delay = 50
-
 {
 local need_skills_opened = true
 function ready()
@@ -15,16 +6,140 @@ function ready()
     crawl.sendkeys("m")
   end
 end
+
+local function pickup_equipment(it, name)
+  if it.is_useless then return end
+
+  local class = it.class(true)
+  if class == "armour" then
+    local good_slots = {cloak="Cloak", helmet="Helmet",
+                        gloves="Gloves", boots="Boots"}
+    st, _ = it.subtype()
+
+    if good_slots[st] ~= nil then
+      if good_slots[st] == "Gloves" and you.has_claws() > 0 then return end
+
+      if it.artefact then return true end
+
+      local cur = items.equipped_at(good_slots[st])
+      if cur == nil then return true end
+
+      if cur.branded or cur.artefact then return end
+      if it.branded then return true end
+
+    elseif st == "body" then
+      local cur = items.equipped_at("armour")
+      if cur == nil then return end
+
+      local aValue = cur.ac * 20
+      if cur.plus then aValue = aValue + cur.plus * 10 end
+
+      local bValue = it.ac * 20
+      if it.plus then bValue = bValue + it.plus * 10 end
+      if it.artefact then bValue = bValue + 120 end
+      local name = it.name()
+      if name:find("runed") or name:find("glowing") or name:find("dyed") or name:find("embroidered") or name:find("shiny") then
+        bValue = bValue + 20 
+      end
+      if bValue > aValue then return true end
+    elseif st == "shield" then
+      if it.artefact then return true end
+      local cur = items.equipped_at("Shield")
+      if it.branded then return true end
+    end
+  elseif class == "weapon" then
+    if it.weap_skill == "Axes" then
+
+      if it.ego() == "Distortion" then return end
+      if you.xl() < 18 and it.ego() == "Flaming" then return true end
+
+      local cur = items.equipped_at("Weapon")
+      if cur == nil then return end
+      local aValue = cur.damage * 10 
+      if cur.plus then aValue = aValue + cur.plus * 3 end
+      if cur.ego() == "vampirism" then aValue = aValue + 50 end
+      if cur.ego() == "flaming" or cur.ego() == "freezing" or cur.ego() == "electrocution" then aValue = aValue + 20 end
+      
+      local bValue = it.damage * 10
+      if it.plus then bValue = bValue + it.plus * 3 end
+      if it.ego() == "vampirism" then bValue = bValue + 50 end
+      if it.hands == 2 then bValue = bValue - 40 end
+      if it.ego() == "flaming" or it.ego() == "freezing" or it.ego() == "electrocution" then bValue = bValue + 20 end
+      if it.artefact and not it.fully_identified then bValue = bValue + 100 end
+      local name = it.name()
+      if name:find("runed") or name:find("glowing") or name:find("shiny") then
+        bValue = bValue + 29 
+      end
+
+      if bValue > aValue then return true end      
+    end
+  end
+  return
+end
+
+add_autopickup_func(pickup_equipment)
+
 }
 
-#include ignores.rc
+autofight_stop = 75
+hp_warning = 50
+default_manual_training = true
 
-# Force mores
+auto_butcher=full
+view_delay = 50
+
+--Ignorable things
+msc := message_colour
+
+msc += mute:You butcher
+msc += mute:You start resting
+msc += mute:Things that are here:
+msc += mute:accepts your kill
+msc += mute:There is an open door here
+msc += mute:You open the door.
+msc += mute:You feel sick
+msc += mute: .* headbutt .*
+msc += mute:You riposte.
+msc += mute:You furiously retaliate.
+msc += mute:You kick the .*
+msc += mute:You bite the .*
+msc += mute:.* bites you but does no damage.
+msc += mute:.* claws you but does no damage.
+msc += mute:.* pecks you but does no damage.
+msc += mute:.* elephant trunk-slaps .*
+msc += mute:.* tentacled monstrosity misses .*
+msc += mute:You block the tentacled monstrosity.*
+msc += mute:.* tentacled monstrosity barely misses .*
+msc += mute:.* tentacled monstrosity tentacle-slaps you but does .*
+msc += mute:The .* hydra closely misses you.
+msc += mute:.* Executioner hits you but does no damage.
+msc += mute:Cheibriados appreciates the change of pace.
+msc += mute:Cheibriados thoroughly appreciates the change of pace.
+msc += mute:This raw flesh tastes great.
+msc += mute:The zombie hands constrict .*
+msc += mute:Zombie hands grab the .*
+msc += mute:Decaying hands burst forth from the earth.
+msc += mute:You reach down and open the door.
+msc += mute:.* stings the plant.*
+
+msc += mute:You see here a stone.
+msc += mute:You see here a bolt.
+msc += mute:You see here am arrow.
+
+msc += mute:Found .* stones.
+msc += mute:Found .* arrows.
+msc += mute:Found .* bolts.
+msc += mute:Found .* gold pieces.
+msc += mute:Found a club.
+msc += mute:Found a robe.
+
+
 force_more_message += distortion
-#force_more_message += holy wrath
-force_more_message += You.*teleport [^f]
+--force_more_message += holy wrath
+force_more_message += suddenly seem different
+force_more_message += strangly unstable
 
-# Bad things
+--Bad things
 stop += You fall through a shaft
 stop += You are sucked into a shaft! .*
 stop += An alarm trap emits a blaring wail
@@ -37,7 +152,7 @@ stop += lose consciousness
 stop += watched by something
 stop += appears from out of your range of vision
 
-# Spell Slots
+--Spell Slots
 spell_slot += Blink:b
 spell_slot += Conjure Flame:c
 spell_slot += Mephitic Cloud:d
@@ -56,7 +171,7 @@ spell_slot += Song of Slaying:w
 spell_slot += Fireball:x
 spell_slot += Stone Arrow:x
 
-# Inscription
+--Inscription
 ai := autoinscribe
 
 ai += curing:@q1
