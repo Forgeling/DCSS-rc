@@ -45,14 +45,24 @@ local function pickup_equipment(it, name)
     elseif st == "shield" then
       if it.artefact then return true end
       local cur = items.equipped_at("Shield")
-      if it.branded then return true end
+      if cur == nil then 
+        if you.xl()<14 then 
+          return true
+        else
+          return
+        end
+      end
+      if it.branded and it.ac >= cur.ac then return true end
     end
   elseif class == "weapon" then
     if it.weap_skill == "Axes" then
 
       if it.ego() == "Distortion" then return end
-      if you.xl() < 18 and it.ego() == "Flaming" then return true end
-
+      local name = it.name()
+      if you.xl() < 18 then
+       if it.ego() == "Flaming" or name:find("runed") or name:find("glowing") or name:find("shiny") then return true end
+      end
+      
       local cur = items.equipped_at("Weapon")
       if cur == nil then return end
       local aValue = cur.damage * 10 
@@ -66,9 +76,8 @@ local function pickup_equipment(it, name)
       if it.hands == 2 then bValue = bValue - 40 end
       if it.ego() == "flaming" or it.ego() == "freezing" or it.ego() == "electrocution" then bValue = bValue + 20 end
       if it.artefact and not it.fully_identified then bValue = bValue + 100 end
-      local name = it.name()
       if name:find("runed") or name:find("glowing") or name:find("shiny") then
-        bValue = bValue + 29 
+        if name:find("broad") or name:find("exec") then bValue = bValue + 50 end
       end
 
       if bValue > aValue then return true end      
@@ -92,17 +101,21 @@ view_delay = 50
 msc := message_colour
 
 msc += mute:You butcher
+msc += mute:This raw flesh tastes great.
 msc += mute:You start resting
 msc += mute:Things that are here:
 msc += mute:accepts your kill
-msc += mute:There is an open door here
+msc += mute:There is an open door here.*
 msc += mute:You open the door.
+msc += mute:You reach down and open the door.
 msc += mute:You feel sick
-msc += mute: .* headbutt .*
+msc += mute:You headbutt .*
 msc += mute:You riposte.
 msc += mute:You furiously retaliate.
 msc += mute:You kick the .*
 msc += mute:You bite the .*
+msc += mute:Lightning courses through the.*
+
 msc += mute:.* bites you but does no damage.
 msc += mute:.* claws you but does no damage.
 msc += mute:.* pecks you but does no damage.
@@ -113,14 +126,15 @@ msc += mute:.* tentacled monstrosity barely misses .*
 msc += mute:.* tentacled monstrosity tentacle-slaps you but does .*
 msc += mute:The .* hydra closely misses you.
 msc += mute:.* Executioner hits you but does no damage.
+msc += mute:.* stings the plant.*
+
 msc += mute:Cheibriados appreciates the change of pace.
 msc += mute:Cheibriados thoroughly appreciates the change of pace.
-msc += mute:This raw flesh tastes great.
+msc += mute:Okawaru is honoured by our kill
+
 msc += mute:The zombie hands constrict .*
 msc += mute:Zombie hands grab the .*
 msc += mute:Decaying hands burst forth from the earth.
-msc += mute:You reach down and open the door.
-msc += mute:.* stings the plant.*
 
 msc += mute:You see here a stone.
 msc += mute:You see here a bolt.
