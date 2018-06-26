@@ -7,10 +7,15 @@ function ready()
   end
 end
 
+local want_axe = false
+local want_bow = true
+local want_shield = false
+
 local function pickup_equipment(it, name)
   if it.is_useless then return end
 
   local class = it.class(true)
+  local name = it.name()
   if class == "armour" then
     local good_slots = {cloak="Cloak", helmet="Helmet",
                         gloves="Gloves", boots="Boots"}
@@ -30,7 +35,6 @@ local function pickup_equipment(it, name)
     elseif st == "body" then
       local cur = items.equipped_at("armour")
       if cur == nil then return end
-      local name = it.name()
 
       if you.xl() > 10 then
         if not it.artefact and not name:find("runed") and not name:find("glowing") and not name:find("dyed") and not name:find("embroidered") and not name:find("shiny") then
@@ -48,7 +52,7 @@ local function pickup_equipment(it, name)
         bValue = bValue + 20 
       end
       if bValue > aValue then return true end
-    elseif st == "shield" and false then
+    elseif st == "shield" and want_shield then
       if it.artefact then return true end
       local cur = items.equipped_at("Shield")
       if cur == nil then 
@@ -61,12 +65,11 @@ local function pickup_equipment(it, name)
       if it.branded and it.ac >= cur.ac then return true end
     end
   elseif class == "weapon" then
-    if it.weap_skill == "Polearms" then
+    if it.weap_skill == "Axes" and want_axe then
 
       if it.ego() == "Distortion" then return end
-      local name = it.name()
       if you.xl() < 18 then
-       if it.ego() == "Flaming" or name:find("runed") or name:find("glowing") or name:find("shiny") then return true end
+        if name:find("runed") or name:find("glowing") or name:find("shiny") then return true end
       end
       
       local cur = items.equipped_at("Weapon")
@@ -86,7 +89,26 @@ local function pickup_equipment(it, name)
         if name:find("broad") or name:find("exec") then bValue = bValue + 50 end
       end
 
-      if bValue > aValue then return true end      
+      if bValue > aValue then return true end    
+    elseif it.weap_skill == "Bows" and want_bow then
+      
+      if you.xl() < 18 then
+        if name:find("runed") or name:find("glowing") or name:find("shiny") then return true end
+      end
+      
+      local cur = items.equipped_at("Weapon")
+      if cur == nil then return end
+      local aValue = cur.damage * 10 
+      if cur.plus then aValue = aValue + cur.plus * 3 end
+      if cur.ego() == "flaming" or cur.ego() == "freezing" then aValue = aValue + 20 end
+      
+      local bValue = it.damage * 10
+      if it.plus then bValue = bValue + it.plus * 3 end
+      if it.ego() == "flaming" or it.ego() == "freezing" then bValue = bValue + 20 end
+      if it.artefact and not it.fully_identified then bValue = bValue + 100 end
+      if name:find("runed") or name:find("glowing") or name:find("shiny") then bValue = bValue + 50 end
+
+      if bValue > aValue then return true end          
     end
   end
   return
