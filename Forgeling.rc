@@ -30,6 +30,13 @@ local function pickup_equipment(it, name)
     elseif st == "body" then
       local cur = items.equipped_at("armour")
       if cur == nil then return end
+      local name = it.name()
+
+      if you.xl() > 10 then
+        if not it.artefact and not name:find("runed") and not name:find("glowing") and not name:find("dyed") and not name:find("embroidered") and not name:find("shiny") then
+          return
+        end
+      end
 
       local aValue = cur.ac * 20
       if cur.plus then aValue = aValue + cur.plus * 10 end
@@ -37,12 +44,11 @@ local function pickup_equipment(it, name)
       local bValue = it.ac * 20
       if it.plus then bValue = bValue + it.plus * 10 end
       if it.artefact then bValue = bValue + 120 end
-      local name = it.name()
       if name:find("runed") or name:find("glowing") or name:find("dyed") or name:find("embroidered") or name:find("shiny") then
         bValue = bValue + 20 
       end
       if bValue > aValue then return true end
-    elseif st == "shield" then
+    elseif st == "shield" and false then
       if it.artefact then return true end
       local cur = items.equipped_at("Shield")
       if cur == nil then 
@@ -55,7 +61,7 @@ local function pickup_equipment(it, name)
       if it.branded and it.ac >= cur.ac then return true end
     end
   elseif class == "weapon" then
-    if it.weap_skill == "Axes" then
+    if it.weap_skill == "Polearms" then
 
       if it.ego() == "Distortion" then return end
       local name = it.name()
