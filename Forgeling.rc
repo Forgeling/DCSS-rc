@@ -7,10 +7,13 @@ function ready()
   end
 end
 
-local want_axe = false
-local want_bow = true
-local want_shield = false
+local want_axe = true
+local want_bow = false
+local want_shield = true
 
+}
+
+{
 local function pickup_equipment(it, name)
   if it.is_useless then return end
 
@@ -52,6 +55,7 @@ local function pickup_equipment(it, name)
         bValue = bValue + 20 
       end
       if bValue > aValue then return true end
+      
     elseif st == "shield" and want_shield then
       if it.artefact then return true end
       local cur = items.equipped_at("Shield")
@@ -82,7 +86,7 @@ local function pickup_equipment(it, name)
       local bValue = it.damage * 10
       if it.plus then bValue = bValue + it.plus * 3 end
       if it.ego() == "vampirism" then bValue = bValue + 50 end
-      if it.hands == 2 then bValue = bValue - 40 end
+      if it.hands == 2 and want_shield then bValue = bValue - 40 end
       if it.ego() == "flaming" or it.ego() == "freezing" or it.ego() == "electrocution" then bValue = bValue + 20 end
       if it.artefact and not it.fully_identified then bValue = bValue + 100 end
       if name:find("runed") or name:find("glowing") or name:find("shiny") then
@@ -124,20 +128,29 @@ default_manual_training = true
 
 auto_butcher=full
 view_delay = 50
+explore_auto_rest = true
+
 
 --Ignorable things
+
 msc := message_colour
 
-msc += mute:You butcher
+--Food
+msc += mute:You butcher.*
 msc += mute:This raw flesh tastes great.
+msc += mute:you are feeling hungry
+msc += mute:this raw flesh tastes terrible
 msc += mute:You start resting
+
+
 msc += mute:Things that are here:
-msc += mute:accepts your kill
 msc += mute:There is an open door here.*
 msc += mute:You open the door.
 msc += mute:You reach down and open the door.
 msc += mute:You feel sick
-msc += mute:You headbutt .*
+msc += mute:You headbutt.*
+msc += mute:your headbutt misses .*
+msc += mute:you block .*
 msc += mute:You riposte.
 msc += mute:You furiously retaliate.
 msc += mute:You kick the .*
@@ -159,6 +172,7 @@ msc += mute:.* stings the plant.*
 msc += mute:Cheibriados appreciates the change of pace.
 msc += mute:Cheibriados thoroughly appreciates the change of pace.
 msc += mute:Okawaru is honoured by our kill
+msc += mute:accepts your kill
 
 msc += mute:The zombie hands constrict .*
 msc += mute:Zombie hands grab the .*
@@ -172,14 +186,17 @@ msc += mute:Found .* stones.
 msc += mute:Found .* arrows.
 msc += mute:Found .* bolts.
 msc += mute:Found .* gold pieces.
-msc += mute:Found a club.
-msc += mute:Found a robe.
+msc += mute:You now have .* gold pieces (gained .*
+msc += mute:(You see here|Found) a club.
+msc += mute:(You see here|Found) a robe.
 
+msc += mute:.* barely misses you.
 
 force_more_message += distortion
 --force_more_message += holy wrath
 force_more_message += suddenly seem different
 force_more_message += strangly unstable
+force_more_message += (?-i:[A-Z]).* comes? into view
 
 --Bad things
 stop += You fall through a shaft
@@ -224,3 +241,4 @@ ai += scrolls? of teleportation:@r3
 ai += magic mapping:@r4
 
 ai += phantom mirror:=g
+
