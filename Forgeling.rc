@@ -135,62 +135,63 @@ explore_auto_rest = true
 
 msc := message_colour
 
---Food
+--Food & Rest
 msc += mute:You butcher.*
-msc += mute:This raw flesh tastes great.
-msc += mute:you are feeling hungry
+msc += blue:This raw flesh tastes great
 msc += mute:this raw flesh tastes terrible
-msc += mute:You start resting
+msc += blue:You start resting
+msc += blue:You start waiting.
 
-
+--General Adventuring
 msc += mute:Things that are here:
-msc += mute:There is an open door here.*
-msc += mute:You open the door.
-msc += mute:You reach down and open the door.
+msc += mute:There is an open door here
+msc += mute:You (open|reach down and open) the door.
 msc += mute:You feel sick
-msc += mute:You headbutt.*
-msc += mute:your headbutt misses .*
-msc += mute:you block .*
-msc += mute:You riposte.
-msc += mute:You furiously retaliate.
-msc += mute:You kick the .*
-msc += mute:You bite the .*
-msc += mute:Lightning courses through the.*
 
+--Combat
+msc += blue:You headbutt.*
+msc += blue:your headbutt misses .*
+msc += mute:you block .*
+msc += blue:You riposte.
+msc += blue:You furiously retaliate.
+msc += blue:You kick the .*
+msc += blue:You bite the .*
+msc += blue:Lightning courses through the.*
+
+--Getting attacked (technically)
 msc += mute:.* bites you but does no damage.
 msc += mute:.* claws you but does no damage.
 msc += mute:.* pecks you but does no damage.
-msc += mute:.* elephant trunk-slaps .*
-msc += mute:.* tentacled monstrosity misses .*
-msc += mute:You block the tentacled monstrosity.*
-msc += mute:.* tentacled monstrosity barely misses .*
-msc += mute:.* tentacled monstrosity tentacle-slaps you but does .*
-msc += mute:The .* hydra closely misses you.
-msc += mute:.* Executioner hits you but does no damage.
-msc += mute:.* stings the plant.*
+msc += blue:.* elephant trunk-slaps .*
+msc += blue:.* tentacled monstrosity misses .*
+msc += blue:You block the tentacled monstrosity.*
+msc += blue:.* tentacled monstrosity barely misses .*
+msc += blue:.* tentacled monstrosity tentacle-slaps you but does .*
+msc += blue:The .* hydra closely misses you.
+msc += blue:.* Executioner hits you but does no damage.
+msc += blue:.* stings the plant.*
 
-msc += mute:Cheibriados appreciates the change of pace.
-msc += mute:Cheibriados thoroughly appreciates the change of pace.
-msc += mute:Okawaru is honoured by our kill
-msc += mute:accepts your kill
+--Boring Gods
+msc += blue:Cheibriados appreciates the change of pace.
+msc += blue:Cheibriados thoroughly appreciates the change of pace.
+msc += blue:Okawaru is honoured by our kill
+msc += blue:accepts your kill
 
-msc += mute:The zombie hands constrict .*
-msc += mute:Zombie hands grab the .*
-msc += mute:Decaying hands burst forth from the earth.
+--Spells with too much info
+msc += blue:The zombie hands constrict .*
+msc += blue:Zombie hands grab the .*
+msc += blue:Decaying hands burst forth from the earth.
 
-msc += mute:You see here a stone.
-msc += mute:You see here a bolt.
-msc += mute:You see here am arrow.
-
-msc += mute:Found .* stones.
-msc += mute:Found .* arrows.
-msc += mute:Found .* bolts.
-msc += mute:Found .* gold pieces.
-msc += mute:You now have .* gold pieces (gained .*
+--Equipment no one wants
+msc += mute:(You see here|Found) .* stones.
+msc += mute:(You see here|Found) .* arrows.
+msc += mute:(You see here|Found) .* bolts.
+msc += blue:You now have .* gold pieces (gained .*
 msc += mute:(You see here|Found) a club.
-msc += mute:(You see here|Found) a robe.
+msc += blue:(You see here|Found) a robe.
 
-msc += mute:.* barely misses you.
+--Experimental
+msc += blue:.* barely misses you.
 
 force_more_message += distortion
 --force_more_message += holy wrath
