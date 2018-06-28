@@ -11,9 +11,6 @@ local want_axe = true
 local want_bow = false
 local want_shield = true
 
-}
-
-{
 local function pickup_equipment(it, name)
   if it.is_useless then return end
 
@@ -57,7 +54,9 @@ local function pickup_equipment(it, name)
       if bValue > aValue then return true end
       
     elseif st == "shield" and want_shield then
+      if you.base_skill("Shields") > 14 and it.ac < 5 then return end
       if it.artefact then return true end
+      
       local cur = items.equipped_at("Shield")
       if cur == nil then 
         if you.xl()<14 then 
@@ -66,14 +65,16 @@ local function pickup_equipment(it, name)
           return
         end
       end
-      if it.branded and it.ac >= cur.ac then return true end
+      if it.ac >= cur.ac then
+       if it.branded or possible_brand(name) then return true end
+      end
     end
   elseif class == "weapon" then
     if it.weap_skill == "Axes" and want_axe then
 
       if it.ego() == "Distortion" then return end
       if you.xl() < 18 then
-        if name:find("runed") or name:find("glowing") or name:find("shiny") then return true end
+        if possible_brand(name) then return true end
       end
       
       local cur = items.equipped_at("Weapon")
@@ -82,16 +83,17 @@ local function pickup_equipment(it, name)
       if cur.plus then aValue = aValue + cur.plus * 3 end
       if cur.ego() == "vampirism" then aValue = aValue + 50 end
       if cur.ego() == "flaming" or cur.ego() == "freezing" or cur.ego() == "electrocution" then aValue = aValue + 20 end
+      if cur.ego() == "venom" or cur.ego() == "draining" or cur.ego() == "protection" then aValue = aValue + 10 end
       
       local bValue = it.damage * 10
       if it.plus then bValue = bValue + it.plus * 3 end
       if it.ego() == "vampirism" then bValue = bValue + 50 end
       if it.hands == 2 and want_shield then bValue = bValue - 40 end
       if it.ego() == "flaming" or it.ego() == "freezing" or it.ego() == "electrocution" then bValue = bValue + 20 end
+      if it.ego() == "venom" or it.ego() == "draining" or it.ego() == "protection" then bValue = bValue + 10 end
       if it.artefact and not it.fully_identified then bValue = bValue + 100 end
-      if name:find("runed") or name:find("glowing") or name:find("shiny") then
-        if name:find("broad") or name:find("exec") then bValue = bValue + 50 end
-      end
+      if possible_brand(name) then bValue = bValue + 50 end
+      if name:find("enchant") then bValue = bValue + 9 end
 
       if bValue > aValue then return true end    
     elseif it.weap_skill == "Bows" and want_bow then
@@ -120,6 +122,12 @@ end
 
 add_autopickup_func(pickup_equipment)
 
+function possible_brand(name)
+  if name:find("runed") or name:find("glowing") or name:find("dyed") or name:find("embroidered") or name:find("shiny") then
+    return true 
+  end
+  return
+end
 }
 
 autofight_stop = 75
@@ -137,10 +145,10 @@ msc := message_colour
 
 --Food & Rest
 msc += mute:You butcher.*
-msc += blue:This raw flesh tastes great
-msc += mute:this raw flesh tastes terrible
+msc += mute:This raw flesh tastes (great|very good\terrible)
 msc += blue:You start resting
 msc += blue:You start waiting.
+msc += Some of the chunks of flesh in your inventory have rotted away
 
 --General Adventuring
 msc += mute:Things that are here:
@@ -149,11 +157,11 @@ msc += mute:You (open|reach down and open) the door.
 msc += mute:You feel sick
 
 --Combat
-msc += blue:You headbutt.*
-msc += blue:your headbutt misses .*
+msc += mute:You headbutt.*
+msc ^= mute:your headbutt misses .*
 msc += mute:you block .*
 msc += blue:You riposte.
-msc += blue:You furiously retaliate.
+msc += mute:You furiously retaliate.
 msc += blue:You kick the .*
 msc += blue:You bite the .*
 msc += blue:Lightning courses through the.*
@@ -175,7 +183,7 @@ msc += blue:.* stings the plant.*
 msc += blue:Cheibriados appreciates the change of pace.
 msc += blue:Cheibriados thoroughly appreciates the change of pace.
 msc += blue:Okawaru is honoured by our kill
-msc += blue:accepts your kill
+msc += mute:accepts your kill
 
 --Spells with too much info
 msc += blue:The zombie hands constrict .*
@@ -183,28 +191,33 @@ msc += blue:Zombie hands grab the .*
 msc += blue:Decaying hands burst forth from the earth.
 
 --Equipment no one wants
-msc += mute:(You see here|Found) .* stones.
-msc += mute:(You see here|Found) .* arrows.
-msc += mute:(You see here|Found) .* bolts.
+msc += mute:(You see here|Found) .* stone(|s).
+msc += mute:(You see here|Found) .* arrow(|s).
+msc += mute:(You see here|Found) .* bolt(|s).
 msc += blue:You now have .* gold pieces (gained .*
 msc += mute:(You see here|Found) a club.
-msc += blue:(You see here|Found) a robe.
+msc += mute:(You see here|Found) a robe.
 
 --Experimental
-msc += blue:.* barely misses you.
+msc ^= mute:.* misses you.
+msc ^= mute:but does no damage
 
-force_more_message += distortion
---force_more_message += holy wrath
-force_more_message += suddenly seem different
-force_more_message += strangly unstable
-force_more_message += (?-i:[A-Z]).* comes? into view
+--Things that should make you pause
+more := fore_more_message
+
+more += distortion
+--more += holy wrath
+more += suddenly seem different
+more += strangly unstable
+more += (?-i:[A-Z]).* comes? into view
 
 --Bad things
+stop := runrest_stop_message
+
 stop += You fall through a shaft
 stop += You are sucked into a shaft! .*
 stop += An alarm trap emits a blaring wail
 stop += (blundered into a|invokes the power of) Zot
-stop += A huge blade swings out and slices into you!
 stop += flesh start
 stop += (starving|feel devoid of blood)
 stop += wrath finds you
@@ -243,3 +256,129 @@ ai += magic mapping:@r4
 
 ai += phantom mirror:=g
 
+{
+
+last_turn = you.turns()
+
+-- Each entry must have a name field with a descriptive name, a pattern field
+-- giving the regexp matching the appropriate monster(s), a cond field giving
+-- the condition type, and a cutoff field giving the max value where the
+-- force-more is active. Possible values for cond are xl and maxhp. Note that
+-- the final force_more pattern will be "(PATTERN).*into view" where PATTERN is
+-- the value from the pattern field if that is a string, or if pattern is an
+-- array, a string made from joining the entries in pattern with '|'.
+
+fm_patterns = {
+  -- Fast, early game Dungeon problems for chars with low mhp.
+  {name = "30mhp", cond = "maxhp", cutoff = 30,
+   pattern = "adder|hound"},
+  -- Dungeon monsters that can damage you for close to 50% of your mhp with a
+  -- ranged attack.
+  {name = "40mhp", cond = "maxhp", cutoff = 40,
+   pattern = "orc priest|electric eel"},
+  {name = "60mhp", cond = "maxhp", cutoff = 60,
+   pattern = "acid dragon|steam dragon|manticore"},
+  {name = "70mhp", cond = "maxhp", cutoff = 70,
+   pattern = "centaur|meliai|yaktaur"},
+  {name = "80mhp", cond = "maxhp", cutoff = 80,
+   pattern = "gargoyle|orc (warlord|knight)"},
+  {name = "90mhp", cond = "maxhp", cutoff = 90,
+   pattern = "centaur warrior|efreet|molten gargoyle|tengu conjurer"},
+  {name = "110mhp", cond = "maxhp", cutoff = 110,
+   pattern = {"centaur warrior", "deep elf", "cyclops", "efreet",
+              "molten gargoyle", "tengu conjurer", "yaktaur captain",
+              "necromancer", "deep troll earth mage", "hell knight",
+              "stone giant"} },
+  {name = "160mhp", cond = "maxhp", cutoff = 160,
+   pattern = {"(fire|ice|quicksilver|shadow|storm) dragon",
+              "(fire|frost) giant", "war gargoyle"} },
+} -- end fm_patterns
+
+active_fm = {}
+-- Set to true to get a message when the fm change
+notify_fm = false
+
+-- Wrapper of crawl.mpr() that prints text in white by default.
+if not mpr then
+  mpr = function (msg, color)
+    if not color then
+      color = "white"
+    end
+    crawl.mpr("<" .. color .. ">" .. msg .. "</" .. color .. ">")
+  end
+end
+
+function init_force_mores()
+  for i,v in ipairs(fm_patterns) do
+    active_fm[#active_fm + 1] = false
+  end
+end
+
+function update_force_mores()
+  local activated = {}
+  local deactivated = {}
+  local hp, maxhp = you.hp()
+  for i,v in ipairs(fm_patterns) do
+    local msg = nil
+    if type(v.pattern) == "table" then
+      for j, p in ipairs(v.pattern) do
+        if msg == nil then
+          msg = p
+        else
+          msg = msg .. "|" .. p
+        end
+      end
+    else
+      msg = v.pattern
+    end
+    msg = "(" .. msg .. ").*into view"
+    local action = nil
+    local fm_name = v.pattern
+    if v.name then
+      fm_name = v.name
+    end
+    if not v.cond and not active_fm[i] then
+      action = "+"
+    elseif v.cond == "xl" then
+      if active_fm[i] and you.xl() >= v.cutoff then
+        action = "-"
+      elseif not active_fm[i] and you.xl() < v.cutoff then
+        action = "+"
+      end
+    elseif v.cond == "maxhp" then
+      if active_fm[i] and maxhp >= v.cutoff then
+        action = "-"
+      elseif not active_fm[i] and maxhp < v.cutoff then
+        action = "+"
+      end
+    end
+    if action == "+" then
+      activated[#activated + 1] = fm_name
+    elseif action == "-" then
+      deactivated[#deactivated + 1] = fm_name
+    end
+    if action ~= nil then
+      local opt = "force_more_message " .. action .. "= " .. msg
+      crawl.setopt(opt)
+      active_fm[i] = not active_fm[i]
+    end
+  end
+  if #activated > 0 and notify_fm then
+    mpr("Activating force_mores: " .. table.concat(activated, ", "))
+  end
+  if #deactivated > 0 and notify_fm then
+    mpr("Deactivating force_mores: " .. table.concat(deactivated, ", "))
+  end
+end
+
+local last_turn = nil
+function force_mores()
+  if last_turn ~= you.turns() then
+    update_force_mores()
+    last_turn = you.turns()
+  end
+end
+
+init_force_mores()
+
+}
