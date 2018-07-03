@@ -1,6 +1,7 @@
 {
 local need_skills_opened = true
 function ready()
+  force_mores()
   if you.turns() == 0 and need_skills_opened then
     need_skills_opened = false
     crawl.sendkeys("m")
@@ -140,7 +141,8 @@ auto_butcher=full
 view_delay = 50
 explore_auto_rest = true
 
-explore_stop  -= items,stairs,shops,altars,portals,branches,runed_doors
+explore_stop  -= items,stairs,shops,portals,branches,runed_doors
+show_more = false
 
 --Ignorable things
 
@@ -207,7 +209,7 @@ msc ^= mute:but does no damage
 
 
 --Things that should make you pause
-more := fore_more_message
+more := force_more_message
 
 more += distortion
 --more += holy wrath
@@ -270,4 +272,15 @@ ai += magic mapping:@r4
 
 ai += phantom mirror:=g
 
+:if not you.god() == "Okawaru" then 
+  more += Okawaru
+:end
+
+:if you.xl() < 4 then
+more += (gnoll|orc priest).* comes? into view
+:end 
+
+:if you.xl() < 8 then
+more += (ogre|water moccasin).* comes? into view
+:end
 
