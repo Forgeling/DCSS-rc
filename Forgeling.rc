@@ -82,6 +82,7 @@ local function pickup_equipment(it, name)
       if cur == nil then return end
       local aValue = cur.damage * 10 
       if cur.plus then aValue = aValue + cur.plus * 5 end
+      if cur.hands == 2 and want_shield then aValue = aValue - 40 end
       if cur.ego() == "vampirism" then aValue = aValue + 50 end
       if cur.ego() == "flaming" or cur.ego() == "freezing" or cur.ego() == "electrocution" or cur.ego() == "chopping" then aValue = aValue + 20 end
       if cur.ego() == "venom" or cur.ego() == "draining" or cur.ego() == "protection" then aValue = aValue + 10 end
@@ -141,7 +142,7 @@ auto_butcher=full
 view_delay = 50
 explore_auto_rest = true
 
-explore_stop  -= items,stairs,shops,portals,branches,runed_doors
+explore_stop  -= items,stairs,shops,branches,runed_doors
 show_more = false
 
 --Ignorable things
@@ -272,15 +273,114 @@ ai += magic mapping:@r4
 
 ai += phantom mirror:=g
 
-:if not you.god() == "Okawaru" then 
-  more += Okawaru
-:end
+{
+last_turn = you.turns()
 
-:if you.xl() < 4 then
-more += (gnoll|orc priest).* comes? into view
-:end 
+fm_patterns = {
+  {name = "50mhp", cond = "maxhp", cutoff = 40,
+   pattern = "orc priest|electric eel"},
+  {name = "60mhp", cond = "maxhp", cutoff = 60,
+   pattern = "acid dragon|steam dragon|manticore|ogre|centaur|killer bee"},
+  {name = "80mhp", cond = "maxhp", cutoff = 80,
+   pattern = "gargoyle|meliai|yaktaur|orc (warlord|knight)"},
+  {name = "90mhp", cond = "maxhp", cutoff = 90,
+   pattern = "centaur warrior|efreet|molten gargoyle|tengu conjurer"},
+  {name = "110mhp", cond = "maxhp", cutoff = 110,
+   pattern = {"centaur warrior", "deep elf", "cyclops", "efreet",
+              "molten gargoyle", "tengu conjurer", "yaktaur captain",
+              "necromancer", "deep troll earth mage", "hell knight",
+              "stone giant"} },
+  {name = "160mhp", cond = "maxhp", cutoff = 160,
+   pattern = {"(fire|ice|quicksilver|shadow|storm) dragon",
+              "(fire|frost) giant", "war gargoyle","hydra"} },
+} -- end fm_patterns
 
-:if you.xl() < 8 then
-more += (ogre|water moccasin).* comes? into view
-:end
+active_fm = {}
+-- Set to true to get a message when the fm change
+notify_fm = false
+
+-- Wrapper of crawl.mpr() that prints text in white by default.
+if not mpr then
+  mpr = function (msg, color)
+    if not color then
+      color = "white"
+    end
+    crawl.mpr("<" .. color .. ">" .. msg .. "</" .. color .. ">")
+  end
+end
+
+function init_force_mores()
+  for i,v in ipairs(fm_patterns) do
+    active_fm[#active_fm + 1] = false
+  end
+end
+
+function update_force_mores()
+  local activated = {}
+  local deactivated = {}
+  local hp, maxhp = you.hp()
+  for i,v in ipairs(fm_patterns) do
+    local msg = nil
+    if type(v.pattern) == "table" then
+      for j, p in ipairs(v.pattern) do
+        if msg == nil then
+          msg = p
+        else
+          msg = msg .. "|" .. p
+        end
+      end
+    else
+      msg = v.pattern
+    end
+    msg = "(" .. msg .. ").*into view"
+    local action = nil
+    local fm_name = v.pattern
+    if v.name then
+      fm_name = v.name
+    end
+    if not v.cond and not active_fm[i] then
+      action = "+"
+    elseif v.cond == "xl" then
+      if active_fm[i] and you.xl() >= v.cutoff then
+        action = "-"
+      elseif not active_fm[i] and you.xl() < v.cutoff then
+        action = "+"
+      end
+    elseif v.cond == "maxhp" then
+      if active_fm[i] and maxhp >= v.cutoff then
+        action = "-"
+      elseif not active_fm[i] and maxhp < v.cutoff then
+        action = "+"
+      end
+    end
+    if action == "+" then
+      activated[#activated + 1] = fm_name
+    elseif action == "-" then
+      deactivated[#deactivated + 1] = fm_name
+    end
+    if action ~= nil then
+      local opt = "force_more_message " .. action .. "= " .. msg
+      crawl.setopt(opt)
+      active_fm[i] = not active_fm[i]
+    end
+  end
+  if #activated > 0 and notify_fm then
+    mpr("Activating force_mores: " .. table.concat(activated, ", "))
+  end
+  if #deactivated > 0 and notify_fm then
+    mpr("Deactivating force_mores: " .. table.concat(deactivated, ", "))
+  end
+end
+
+local last_turn = nil
+function force_mores()
+  if last_turn ~= you.turns() then
+    update_force_mores()
+    last_turn = you.turns()
+  end
+end
+
+init_force_mores()
+
+}
 
