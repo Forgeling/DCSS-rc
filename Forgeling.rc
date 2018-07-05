@@ -1,5 +1,6 @@
 {
 local need_skills_opened = true
+local have_gds = false
 function ready()
   force_mores()
   if you.turns() == 0 and need_skills_opened then
@@ -8,8 +9,9 @@ function ready()
   end
 end
 
-local want_axe = true
+local want_axe = false
 local want_bow = false
+local want_polearm = true
 local want_shield = true
 
 local function pickup_equipment(it, name)
@@ -29,6 +31,8 @@ local function pickup_equipment(it, name)
 
       local cur = items.equipped_at(good_slots[st])
       if cur == nil then return true end
+      
+      if name:find("scarf") and you.xl()<20 then return true end
 
       if cur.branded or cur.artefact then return end
       if it.branded then return true end
@@ -36,6 +40,11 @@ local function pickup_equipment(it, name)
     elseif st == "body" then
       local cur = items.equipped_at("armour")
       if cur == nil then return end
+      
+      if have_gds == false and name:find("gold dragon scales") then
+        have_gds = true
+        return true
+      end
 
       if you.xl() > 10 then
         if not it.artefact and not possible_brand(name) then
@@ -71,45 +80,44 @@ local function pickup_equipment(it, name)
       end
     end
   elseif class == "weapon" then
+    if it.ego() == "Distortion" then return end
+    
+    local cur = items.equipped_at("Weapon")
+    if cur == nil then return end
+    local aValue = cur.damage * 10 
+    if cur.plus then aValue = aValue + cur.plus * 5 end
+    if cur.hands == 2 and want_shield then aValue = aValue - 40 end
+    if cur.ego() == "vampirism" then aValue = aValue + 75 end
+    if cur.ego() == "flaming" or cur.ego() == "freezing" or cur.ego() == "electrocution" or cur.ego() == "chopping" then aValue = aValue + 35 end
+    if cur.ego() == "venom" or cur.ego() == "draining" or cur.ego() == "protection" then aValue = aValue + 20 end    
+    
+    local bValue = it.damage * 10
+    if it.plus then bValue = bValue + it.plus * 5 end
+    if it.ego() == "vampirism" then bValue = bValue + 50 end
+    if it.hands == 2 and want_shield then bValue = bValue - 40 end
+    if it.ego() == "flaming" or it.ego() == "freezing" or it.ego() == "electrocution" or it.ego() == "chopping" then bValue = bValue + 35 end
+    if it.ego() == "venom" or it.ego() == "draining" or it.ego() == "protection" then bValue = bValue + 20 end
+    if it.artefact and not it.fully_identified then bValue = bValue + 100 end
+    if possible_brand(name) then bValue = bValue + 75 end
+    if name:find("enchant") then bValue = bValue + 15 end
+    
     if it.weap_skill == "Axes" and want_axe then
 
-      if it.ego() == "Distortion" then return end
       if you.xl() < 18 then
         if possible_brand(name) or it.ego() == "flaming" then return true end
       end
       
-      local cur = items.equipped_at("Weapon")
-      if cur == nil then return end
-      local aValue = cur.damage * 10 
-      if cur.plus then aValue = aValue + cur.plus * 5 end
-      if cur.hands == 2 and want_shield then aValue = aValue - 40 end
-      if cur.ego() == "vampirism" then aValue = aValue + 50 end
-      if cur.ego() == "flaming" or cur.ego() == "freezing" or cur.ego() == "electrocution" or cur.ego() == "chopping" then aValue = aValue + 20 end
-      if cur.ego() == "venom" or cur.ego() == "draining" or cur.ego() == "protection" then aValue = aValue + 10 end
-      
-      local bValue = it.damage * 10
-      if it.plus then bValue = bValue + it.plus * 5 end
-      if it.ego() == "vampirism" then bValue = bValue + 50 end
-      if it.hands == 2 and want_shield then bValue = bValue - 40 end
-      if it.ego() == "flaming" or it.ego() == "freezing" or it.ego() == "electrocution" or it.ego() == "chopping" then bValue = bValue + 20 end
-      if it.ego() == "venom" or it.ego() == "draining" or it.ego() == "protection" then bValue = bValue + 10 end
-      if it.artefact and not it.fully_identified then bValue = bValue + 100 end
-      if possible_brand(name) then bValue = bValue + 50 end
-      if name:find("enchant") then bValue = bValue + 15 end
-
       if bValue > aValue then return true end   
+      
+    elseif it.weap_skill == "Polearms" and want_polearm then
+      
+      if bValue > aValue then return true end  
       
     elseif it.weap_skill == "Bows" and want_bow then
       
       if you.xl() < 18 then
         if name:find("runed") or name:find("glowing") or name:find("shiny") then return true end
       end
-      
-      local cur = items.equipped_at("Weapon")
-      if cur == nil then return end
-      local aValue = cur.damage * 10 
-      if cur.plus then aValue = aValue + cur.plus * 3 end
-      if cur.ego() == "flaming" or cur.ego() == "freezing" then aValue = aValue + 20 end
       
       local bValue = it.damage * 10
       if it.plus then bValue = bValue + it.plus * 3 end
@@ -176,19 +184,13 @@ msc += mute:Lightning courses through the.*
 msc += mute:.* bites you but does no damage.
 msc += mute:.* claws you but does no damage.
 msc += mute:.* pecks you but does no damage.
-msc += blue:.* elephant trunk-slaps .*
-msc += blue:.* tentacled monstrosity misses .*
-msc += blue:You block the tentacled monstrosity.*
-msc += blue:.* tentacled monstrosity barely misses .*
-msc += blue:.* tentacled monstrosity tentacle-slaps you but does .*
-msc += blue:The .* hydra closely misses you.
-msc += blue:.* Executioner hits you but does no damage.
+msc += mute:.* elephant trunk-slaps .*
 msc += blue:.* stings the plant.*
 
 --Boring Gods
 msc += blue:Cheibriados appreciates the change of pace.
 msc += blue:Cheibriados thoroughly appreciates the change of pace.
-msc += blue:Okawaru is honoured by our kill
+msc ^= blue:Okawaru is honoured by your kill
 msc += mute:accepts your kill
 
 --Spells with too much info
@@ -217,6 +219,8 @@ more += distortion
 more += suddenly seem different
 more += strangly unstable
 more += (?-i:[A-Z]).* comes? into view
+more += player ghost.* comes? into view
+more += titanic
 
 msc ^= magenta:distortion
 
@@ -277,22 +281,24 @@ ai += phantom mirror:=g
 last_turn = you.turns()
 
 fm_patterns = {
-  {name = "50mhp", cond = "maxhp", cutoff = 40,
-   pattern = "orc priest|electric eel"},
+  {name = "50mhp", cond = "maxhp", cutoff = 50,
+   pattern = "orc priest|electric eel|gnoll"},
   {name = "60mhp", cond = "maxhp", cutoff = 60,
-   pattern = "acid dragon|steam dragon|manticore|ogre|centaur|killer bee"},
+   pattern = "acid dragon|steam dragon|manticore|ogre|centaur|killer bee|water moccasin"},
   {name = "80mhp", cond = "maxhp", cutoff = 80,
-   pattern = "gargoyle|meliai|yaktaur|orc (warlord|knight)"},
+   pattern = "gargoyle|meliai|yaktaur|orc warrior|troll"},
   {name = "90mhp", cond = "maxhp", cutoff = 90,
-   pattern = "centaur warrior|efreet|molten gargoyle|tengu conjurer"},
+   pattern = "centaur warrior|efreet|molten gargoyle|tengu conjurer|orc (warlord|knight)"},
   {name = "110mhp", cond = "maxhp", cutoff = 110,
    pattern = {"centaur warrior", "deep elf", "cyclops", "efreet",
               "molten gargoyle", "tengu conjurer", "yaktaur captain",
               "necromancer", "deep troll earth mage", "hell knight",
-              "stone giant"} },
+              "stone giant", "ugly thing", "two-headed ogre"} },
   {name = "160mhp", cond = "maxhp", cutoff = 160,
    pattern = {"(fire|ice|quicksilver|shadow|storm) dragon",
               "(fire|frost) giant", "war gargoyle","hydra"} },
+  {name = "500mhp", cond = "maxhp", cutoff = 500,
+   pattern = "orb of fire|caustic shrike|curse skull|curse toe"},
 } -- end fm_patterns
 
 active_fm = {}
@@ -383,4 +389,3 @@ end
 init_force_mores()
 
 }
-
