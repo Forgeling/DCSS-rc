@@ -259,7 +259,7 @@ spell_slot += Stone Arrow:x
 
 --Autopickups
 ae := autopickup_exceptions
-ae += <vulnerability|mutation
+ae += <vulnerability|mutation|phantom mirror
 ae += >immolation|amnesia|brilliance|random effect|polymorph
 
 --Drops
