@@ -298,7 +298,7 @@ fm_patterns = {
    pattern = {"(fire|ice|quicksilver|shadow|storm) dragon",
               "(fire|frost) giant", "war gargoyle","hydra"} },
   {name = "500mhp", cond = "maxhp", cutoff = 500,
-   pattern = "orb of fire|caustic shrike|curse skull|curse toe"},
+   pattern = "orb of fire|caustic shrike|curse skull|curse toe|iron giant"},
 } -- end fm_patterns
 
 active_fm = {}
