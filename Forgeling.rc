@@ -176,8 +176,8 @@ msc ^= mute:your headbutt misses .*
 msc += mute:you block .*
 msc += blue:You riposte.
 msc += mute:You furiously retaliate.
-msc += blue:You kick the .*
-msc += blue:You bite the .*
+msc += mute:You kick the .*
+msc += mute:You bite the .*
 msc += mute:Lightning courses through the.*
 
 --Getting attacked (technically)
@@ -242,20 +242,25 @@ stop += appears from out of your range of vision
 spell_slot += Blink:b
 spell_slot += Conjure Flame:c
 spell_slot += Mephitic Cloud:d
+spell_slot += Call Canine Familiar:d
 spell_slot += Infusion:e
+spell_slot += Confuse:g
 spell_slot += Regeneration:h
 spell_slot += Ignition:i
 spell_slot += Deflect Missiles:m
 spell_slot += Apportation:n
+spell_slot += Aura of Abjuration:p
 spell_slot += Shroud of Golubria:q
 spell_slot += Swiftness:r
 spell_slot += Sticky Flame:s
 spell_slot += Poisonous Vapours:s
+spell_slot += Call Imp:s
 spell_slot += Bolt of Fire:v
 spell_slot += Bolt of Cold:v
 spell_slot += Song of Slaying:w
 spell_slot += Fireball:x
 spell_slot += Stone Arrow:x
+spell_slot += Invisibility:I
 
 --Autopickups
 ae := autopickup_exceptions
