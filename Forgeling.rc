@@ -11,8 +11,9 @@ end
 
 local want_axe = false
 local want_bow = false
-local want_polearm = true
+local want_polearm = false
 local want_shield = true
+local want_body = false
 
 local function pickup_equipment(it, name)
   if it.is_useless then return end
@@ -37,7 +38,7 @@ local function pickup_equipment(it, name)
       if cur.branded or cur.artefact then return end
       if it.branded then return true end
 
-    elseif st == "body" then
+    elseif st == "body" and want_body then
       local cur = items.equipped_at("armour")
       if cur == nil then return end
       
@@ -197,6 +198,7 @@ msc += mute:accepts your kill
 msc += blue:The zombie hands constrict .*
 msc += blue:Zombie hands grab the .*
 msc += blue:Decaying hands burst forth from the earth.
+msc += mute:Your fire vortex resists.
 
 --Equipment no one wants
 msc += mute:(You see here|Found) .* stone(|s).
@@ -221,6 +223,7 @@ more += strangly unstable
 more += (?-i:[A-Z]).* comes? into view
 more += player ghost.* comes? into view
 more += titanic
+more += The gold dragon goes berserk!
 
 msc ^= magenta:distortion
 
