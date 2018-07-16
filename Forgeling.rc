@@ -9,11 +9,11 @@ function ready()
   end
 end
 
-local want_axe = false
+local want_axe = true
 local want_bow = false
 local want_polearm = false
 local want_shield = true
-local want_body = false
+local want_body = true
 
 local function pickup_equipment(it, name)
   if it.is_useless then return end
@@ -150,7 +150,7 @@ default_manual_training = true
 auto_butcher=full
 view_delay = 50
 explore_auto_rest = true
-rest_wait_percent = 80
+rest_wait_percent = 95
 
 explore_stop  -= items,stairs,shops,branches,runed_doors
 show_more = false
@@ -263,9 +263,7 @@ spell_slot += Bolt of Cold:v
 spell_slot += Song of Slaying:w
 spell_slot += Fireball:x
 spell_slot += Stone Arrow:x
-spell_slot += Yara's Violent Unravelling
 spell_slot += Blink:B
-spell_slot += Tukima's Dance
 spell_slot += Invisibility:I
 
 --Autopickups
