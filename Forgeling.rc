@@ -9,11 +9,11 @@ function ready()
   end
 end
 
-local want_axe = true
+local want_axe = false
 local want_bow = false
 local want_polearm = false
-local want_shield = true
-local want_body = true
+local want_shield = false
+local want_body = false
 
 local function pickup_equipment(it, name)
   if it.is_useless then return end
@@ -150,7 +150,7 @@ default_manual_training = true
 auto_butcher=full
 view_delay = 50
 explore_auto_rest = true
-rest_wait_percent = 95
+rest_wait_percent = 85
 
 explore_stop  -= items,stairs,shops,branches,runed_doors
 show_more = false
@@ -197,8 +197,8 @@ msc += mute:accepts your kill
 
 --Spells with too much info
 msc += mute:The zombie hands constrict .*
-msc += blue:Zombie hands grab the .*
-msc += blue:Decaying hands burst forth from the earth.
+msc += mute:Zombie hands grab the .*
+msc += mute:Decaying hands burst forth from the earth.
 msc += mute:Your fire vortex resists.
 
 --Equipment no one wants
