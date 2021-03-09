@@ -1,0 +1,493 @@
+# TEAMCAPTAIN Ge0ff
+
+{
+local need_skills_opened = true
+local have_gds = false
+function ready()
+  force_mores()
+  if you.turns() == 0 and need_skills_opened then
+    need_skills_opened = false
+    crawl.sendkeys("m")
+  end
+end
+
+local want_axe = false
+local want_bow = false
+local want_polearm = false
+local want_shield = true
+local want_body = false
+
+local function pickup_equipment(it, name)
+  if it.is_useless then return end
+
+  local class = it.class(true)
+  local name = it.name()
+  if class == "armour" then
+    local good_slots = {cloak="Cloak", helmet="Helmet",
+                        gloves="Gloves", boots="Boots"}
+    st, _ = it.subtype()
+
+    if good_slots[st] ~= nil then
+      if good_slots[st] == "Gloves" and you.has_claws() > 0 then return end
+
+      if it.artefact then return true end
+
+      local cur = items.equipped_at(good_slots[st])
+      if cur == nil then return true end
+     
+      if name:find("scarf") and you.xl()<20 then return true end
+
+      if cur.branded or cur.artefact then return end
+      if it.branded then return true end
+
+    elseif st == "body" and want_body then
+      local cur = items.equipped_at("armour")
+      if cur == nil then return end
+     
+      if have_gds == false and name:find("gold dragon scales") then
+        have_gds = true
+        return true
+      end
+
+      if you.xl() > 10 then
+        if not it.artefact and not possible_brand(name) then
+          return
+        end
+      end
+
+      local aValue = cur.ac * 20
+      if cur.plus then aValue = aValue + cur.plus * 10 end
+
+      local bValue = it.ac * 20
+      if it.plus then bValue = bValue + it.plus * 10 end
+      if it.artefact then bValue = bValue + 120 end
+      if possible_brand(name) then
+        bValue = bValue + 20
+      end
+      if bValue > aValue then return true end
+     
+    elseif st == "shield" and want_shield then
+      if you.base_skill("Shields") > 14 and it.ac < 5 then return end
+      if it.artefact then return true end
+     
+      local cur = items.equipped_at("Shield")
+      if cur == nil then
+        if you.xl()<14 then
+          return true
+        else
+          return
+        end
+      end
+      if it.ac >= cur.ac then
+       if it.branded or possible_brand(name) then return true end
+      end
+    end
+  elseif class == "weapon" then
+    if it.ego() == "Distortion" then return end
+   
+    local cur = items.equipped_at("Weapon")
+    if cur == nil then return end
+    local aValue = cur.damage * 10
+    if cur.plus then aValue = aValue + cur.plus * 5 end
+    if cur.hands == 2 and want_shield then aValue = aValue - 40 end
+    if cur.ego() == "vampirism" then aValue = aValue + 75 end
+    if cur.ego() == "flaming" or cur.ego() == "freezing" or cur.ego() == "electrocution" or cur.ego() == "chopping" then aValue = aValue + 35 end
+    if cur.ego() == "venom" or cur.ego() == "draining" or cur.ego() == "protection" then aValue = aValue + 20 end    
+   
+    local bValue = it.damage * 10
+    if it.plus then bValue = bValue + it.plus * 5 end
+    if it.ego() == "vampirism" then bValue = bValue + 50 end
+    if it.hands == 2 and want_shield then bValue = bValue - 40 end
+    if it.ego() == "flaming" or it.ego() == "freezing" or it.ego() == "electrocution" or it.ego() == "chopping" then bValue = bValue + 35 end
+    if it.ego() == "venom" or it.ego() == "draining" or it.ego() == "protection" then bValue = bValue + 20 end
+    if it.artefact and not it.fully_identified then bValue = bValue + 100 end
+    if possible_brand(name) then bValue = bValue + 75 end
+    if name:find("enchant") then bValue = bValue + 15 end
+   
+    if it.weap_skill == "Axes" and want_axe then
+
+      if you.xl() < 18 then
+        if possible_brand(name) or it.ego() == "flaming" then return true end
+      end
+     
+      if bValue > aValue then return true end  
+     
+    elseif it.weap_skill == "Polearms" and want_polearm then
+     
+      if bValue > aValue then return true end  
+     
+    elseif it.weap_skill == "Bows" and want_bow then
+     
+      if you.xl() < 18 then
+        if name:find("runed") or name:find("glowing") or name:find("shiny") then return true end
+      end
+     
+      local bValue = it.damage * 10
+      if it.plus then bValue = bValue + it.plus * 3 end
+      if it.ego() == "flaming" or it.ego() == "freezing" then bValue = bValue + 20 end
+      if it.artefact and not it.fully_identified then bValue = bValue + 100 end
+      if name:find("runed") or name:find("glowing") or name:find("shiny") then bValue = bValue + 50 end
+
+      if bValue > aValue then return true end          
+    end
+  end
+  return
+end
+
+add_autopickup_func(pickup_equipment)
+
+function possible_brand(name)
+  if name:find("runed") or name:find("glowing") or name:find("dyed") or name:find("embroidered") or name:find("shiny") then
+    return true
+  end
+  return
+end
+
+}
+
+bindkey = [s] CMD_WEAPON_SWAP
+default_manual_training = true
+
+autofight_stop = 70
+hp_warning = 50
+view_delay = 50
+explore_auto_rest = true
+rest_wait_percent = 100
+
+explore_stop  -= stairs,shops,branches,runed_doors
+show_more = false
+
+--Ignorable things
+
+msc := message_colour
+
+--Food & Rest
+msc += blue:You start resting
+msc += blue:You start waiting.
+
+--General Adventuring
+msc += mute:Things that are here:
+msc += mute:There is an open door here
+msc += mute:You (open|reach down and open) the door.
+msc += mute:You feel sick
+
+--Combat
+msc += mute:You headbutt.*
+msc ^= mute:your headbutt misses .*
+msc += mute:you block .*
+msc += blue:You riposte.
+msc += mute:You furiously retaliate.
+msc += mute:You kick the .*
+msc += mute:You bite the .*
+msc += mute:Lightning courses through the.*
+
+--Getting attacked (technically)
+msc += mute:.* bites you but does no damage.
+msc += mute:.* claws you but does no damage.
+msc += mute:.* pecks you but does no damage.
+msc += mute:.* elephant trunk-slaps .*
+msc += blue:.* stings the plant.*
+
+--Boring Gods
+msc += blue:Cheibriados appreciates the change of pace.
+msc += blue:Cheibriados thoroughly appreciates the change of pace.
+msc ^= blue:Okawaru is honoured by your kill
+msc += mute:accepts your kill
+
+--Spells with too much info
+msc += mute:The zombie hands constrict .*
+msc += mute:Zombie hands grab the .*
+msc += mute:Decaying hands burst forth from the earth.
+msc += mute:Your fire vortex resists.
+
+--Equipment no one wants
+msc += mute:(You see here|Found) .* stone(|s).
+msc += mute:(You see here|Found) .* arrow(|s).
+msc += mute:(You see here|Found) .* bolt(|s).
+msc += blue:You now have .* gold pieces (gained .*
+msc += mute:(You see here|Found) a club.
+msc += mute:(You see here|Found) a robe.
+
+--Experimental
+msc ^= mute:.* misses you.
+msc ^= mute:but does no damage
+
+
+--Things that should make you pause
+more := force_more_message
+
+more += distortion
+--more += holy wrath
+more += suddenly seem different
+more += strangely unstable
+more += (?-i:[A-Z]).* comes? into view
+more += player ghost.* comes? into view
+more += titanic
+more += The golden dragon goes berserk!
+more += A sentinel's mark
+more += cast into the abyss
+more += you hear the
+more += breathes a plume of cal
+more += less protected from missiles
+more += have finished your manual
+--more += curare
+more += is.*carrying a wand of
+
+msc ^= magenta:distortion
+
+--Bad things
+stop := runrest_stop_message
+
+stop += You fall through a shaft
+stop += You are sucked into a shaft! .*
+stop += An alarm trap emits a blaring wail
+stop += (blundered into a|invokes the power of) Zot
+stop += flesh start
+stop += (starving|feel devoid of blood)
+stop += wrath finds you
+stop += lose consciousness
+stop += watched by something
+stop += appears from out of your range of vision
+stop += wand of acid
+
+--Spell Slots
+spell_slot += Conjure Flame:c
+spell_slot += Frozen Ramparts:c
+spell_slot += Mephitic Cloud:d
+spell_slot += Call Canine Familiar:d
+spell_slot += Infusion:e
+spell_slot += Statue Form:e
+spell_slot += Fulminant Prism:f
+spell_slot += Spectral Weapon:f
+spell_slot += Ignite Poison:g
+spell_slot += Gells Gravitas:g
+spell_slot += Petrify:g
+spell_slot += Ensorcelled Hibernation:g
+spell_slot += Confusing Touch:h
+spell_slot += Ignition:i
+spell_slot += Tukima's Dance:j
+spell_slot += Confuse:k
+spell_slot += Sublimation of Blood:l
+spell_slot += Deflect Missiles:m
+spell_slot += Apportation:n
+spell_slot += Dazzling Flash:p
+spell_slot += Aura of Abjuration:p
+spell_slot += Dazzling Spray:p
+spell_slot += Shroud of Golubria:q
+spell_slot += Swiftness:r
+spell_slot += Airstrike:s
+spell_slot += Sticky Flame:s
+spell_slot += Poisonous Vapours:s
+spell_slot += Call Imp:s
+spell_slot += Vampiric Draining:s
+spell_slot += Passwall:u
+spell_slot += Bolt of Fire:v
+spell_slot += Hailstorm:v
+spell_slot += Olgreb's Toxic Radiance:w
+spell_slot += Wereblood:w
+spell_slot += Searing Ray:x
+spell_slot += Fireball:x
+spell_slot += Stone Arrow:x
+spell_slot += Irradiate:y
+spell_slot += Blink:B
+spell_slot += Cause Fear:F
+spell_slot += Invisibility:I
+
+force_targeter -=ignition
+force_targeter -=frozen ramparts
+force_targeter -=hailstorm
+force_targeter -=starburst
+
+ability_slot += Berserk:k
+ability_slot += Blink:B
+ability_slot += Fly|flight:F
+ability_slot += Stop Flying:L
+
+item_slot ^= scroll of blinking:D
+item_slot ^= scroll of fear:E
+item_slot ^= scroll of fog:F
+item_slot ^= scroll of holy word:W
+item_slot ^= scroll of identify:Z
+item_slot ^= scroll of immolation:K
+item_slot ^= scroll of magic map:X
+item_slot ^= scroll of noise:f
+item_slot ^= scroll of random uselessness:f
+item_slot ^= scroll of silence:O
+item_slot ^= scroll of summoning:S
+item_slot ^= scroll of teleportation:Y
+item_slot ^= scroll of vulnerability:V
+
+item_slot ^= potion of ambrosia:G
+item_slot ^= potion of attraction:A
+item_slot ^= potion of berserk rage:T
+item_slot ^= potion of brilliance:B
+item_slot ^= potion of cancellation:C
+item_slot ^= potion of curing:J
+item_slot ^= potion of degeneration:f
+item_slot ^= potion of flight:L
+item_slot ^= potion of haste:H
+item_slot ^= potion of heal wounds:N
+item_slot ^= potion of invisibility:I
+item_slot ^= potion of lignification:P
+item_slot ^= potion of magic:Q
+item_slot ^= potion of mutation:U
+item_slot ^= potion of might:M
+item_slot ^= potion of resistance:R
+
+item_slot ^= wand of acid:h
+item_slot ^= wand of digging:d
+item_slot ^= wand of mindburst:y
+item_slot ^= wand of charming:e
+item_slot ^= wand of flame:q
+item_slot ^= wand of iceblast:i
+item_slot ^= wand of paralysis:p
+item_slot ^= wand of polymorph:j
+item_slot ^= wand of random effects:r
+
+item_slot ^= tin of tremorstones:g
+item_slot ^= condenser vane:l
+item_slot ^= phial of floods:w
+item_slot ^= lightning rod:v
+item_slot ^= box of beasts:z
+item_slot ^= Horn of Geryon:n
+item_slot ^= phantom mirror:m
+
+item_slot ^= stone:s
+
+--Autopickups
+ae := autopickup_exceptions
+ae += <vulnerability|mutation|phantom mirror
+ae += <javelin|boomerang|dart|throwing net|large rock
+ae += <lightning rod|tremorstone|phial|box of beast|sack of spiders|lamp|fan|ziggurat|vane
+--ae += >immolation|amnesia|brilliance|random effect|polymorph
+
+--Drops
+drop_filter += (scroll|scrolls) of noise
+
+--Inscription
+ai := autoinscribe
+
+--ai += scroll:!r
+--ai += potion:!q
+
+ai += curing:@q1
+ai += heal wounds:@q2
+ai += identify:@r1
+ai += remove curse:@r2
+ai += scrolls? of teleportation:@r3
+ai += magic mapping:@r4
+
+
+{
+last_turn = you.turns()
+
+fm_patterns = {
+  {name = "50mhp", cond = "maxhp", cutoff = 50,
+   pattern = "orc priest|electric eel|gnoll"},
+  {name = "60mhp", cond = "maxhp", cutoff = 60,
+   pattern = "acid dragon|steam dragon|manticore|ogre|centaur|killer bee|water moccasin"},
+  {name = "80mhp", cond = "maxhp", cutoff = 80,
+   pattern = "gargoyle|meliai|yaktaur|orc warrior|troll"},
+  {name = "90mhp", cond = "maxhp", cutoff = 90,
+   pattern = "centaur warrior|efreet|molten gargoyle|tengu conjurer|orc (warlord|knight)"},
+  {name = "110mhp", cond = "maxhp", cutoff = 110,
+   pattern = {"centaur warrior", "deep elf", "cyclops", "efreet",
+              "molten gargoyle", "tengu conjurer", "yaktaur captain",
+              "necromancer", "deep troll earth mage", "hell knight",
+              "boulder beetle", 
+              "stone giant", "ugly thing", "two-headed ogre", "ogre mage"} },
+  {name = "160mhp", cond = "maxhp", cutoff = 160,
+   pattern = {"(fire|ice|quicksilver|shadow|storm) dragon",
+              "(fire|frost) giant", "war gargoyle","hydra","thorn hunter","minotaur","merfolk javelineer"} },
+  {name = "500mhp", cond = "maxhp", cutoff = 500,
+   pattern = "orb of fire|caustic shrike|curse skull|curse toe|iron giant|juggernaut|shining eye"},
+} -- end fm_patterns
+
+active_fm = {}
+-- Set to true to get a message when the fm change
+notify_fm = false
+
+-- Wrapper of crawl.mpr() that prints text in white by default.
+if not mpr then
+  mpr = function (msg, color)
+    if not color then
+      color = "white"
+    end
+    crawl.mpr("<" .. color .. ">" .. msg .. "</" .. color .. ">")
+  end
+end
+
+function init_force_mores()
+  for i,v in ipairs(fm_patterns) do
+    active_fm[#active_fm + 1] = false
+  end
+end
+
+function update_force_mores()
+  local activated = {}
+  local deactivated = {}
+  local hp, maxhp = you.hp()
+  for i,v in ipairs(fm_patterns) do
+    local msg = nil
+    if type(v.pattern) == "table" then
+      for j, p in ipairs(v.pattern) do
+        if msg == nil then
+          msg = p
+        else
+          msg = msg .. "|" .. p
+        end
+      end
+    else
+      msg = v.pattern
+    end
+    msg = "(" .. msg .. ").*into view"
+    local action = nil
+    local fm_name = v.pattern
+    if v.name then
+      fm_name = v.name
+    end
+    if not v.cond and not active_fm[i] then
+      action = "+"
+    elseif v.cond == "xl" then
+      if active_fm[i] and you.xl() >= v.cutoff then
+        action = "-"
+      elseif not active_fm[i] and you.xl() < v.cutoff then
+        action = "+"
+      end
+    elseif v.cond == "maxhp" then
+      if active_fm[i] and maxhp >= v.cutoff then
+        action = "-"
+      elseif not active_fm[i] and maxhp < v.cutoff then
+        action = "+"
+      end
+    end
+    if action == "+" then
+      activated[#activated + 1] = fm_name
+    elseif action == "-" then
+      deactivated[#deactivated + 1] = fm_name
+    end
+    if action ~= nil then
+      local opt = "force_more_message " .. action .. "= " .. msg
+      crawl.setopt(opt)
+      active_fm[i] = not active_fm[i]
+    end
+  end
+  if #activated > 0 and notify_fm then
+    mpr("Activating force_mores: " .. table.concat(activated, ", "))
+  end
+  if #deactivated > 0 and notify_fm then
+    mpr("Deactivating force_mores: " .. table.concat(deactivated, ", "))
+  end
+end
+
+local last_turn = nil
+function force_mores()
+  if last_turn ~= you.turns() then
+    update_force_mores()
+    last_turn = you.turns()
+  end
+end
+
+init_force_mores()
+
+}
